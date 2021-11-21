@@ -1,3 +1,5 @@
+@import "common";
+
 .be-settings {
   > .be-popup {
     top: 0 !important;
@@ -17,7 +19,10 @@
       border-radius: 0 !important;
       border-width: 0 1px 0 0 !important;
       height: var(--panel-height) !important;
-      box-shadow: 0 0 128px 0 #0008 !important;
+
+      body.settings-panel-dock-right & {
+        border-width: 0 0 0 1px !important;
+      }
     }
   }
   > .sidebar > * {
@@ -47,8 +52,29 @@
   }
   .widgets-panel {
     padding: 24px !important;
+    @include no-scrollbar();
     &-header {
       margin-bottom: 36px !important;
+    }
+    .switch-options-popup {
+      left: 50%;
+      top: calc(100% + 4px) !important;
+      transform-origin: top !important;
+      max-width: calc(100% + 40px) !important;
+      max-height: unset !important;
+      transform: translateX(calc(-50% * var(--direction))) scale(0.9) !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      > * {
+        flex-grow: 1;
+      }
+      &.open {
+        transform: translateX(calc(-50% * var(--direction))) scale(1) !important;
+      }
+      body.settings-panel-dock-right & {
+        left: unset !important;
+        right: 50% !important;
+      }
     }
   }
 }

@@ -13,7 +13,7 @@
         </div>
         <a
           class="keymap-settings-header-help"
-          href="https://github.com/the1812/Bilibili-Evolved/blob/v2/registry/lib/components/utils/keymap/help.md"
+          href="https://github.com/the1812/Bilibili-Evolved/blob/preview/registry/lib/components/utils/keymap/help.md"
           target="_blank"
           title="查看帮助"
         >
@@ -143,7 +143,7 @@ export default Vue.extend({
   font-size: 12px;
   display: flex;
   flex-direction: column;
-  padding: 12px 12px 12px 18px;
+  padding: 12px 12px 0 18px;
   &-header {
     @include h-center();
     margin-bottom: 8px;
@@ -172,6 +172,7 @@ export default Vue.extend({
     flex: 1 0 auto;
     max-height: calc(100vh - 200px);
     overflow: auto;
+    padding-bottom: 12px;
     .keymap-settings-grid {
       .grid-header,
       .grid-row {

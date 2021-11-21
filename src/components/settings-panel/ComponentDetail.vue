@@ -16,8 +16,10 @@
           {{ t.displayName }}
         </div>
       </div>
-      <div class="component-detail-separator"></div>
-      <template v-if="componentData.options && generatedOptions.length > 0">
+      <!-- <div class="component-detail-separator"></div> -->
+      <template
+        v-if="(componentData.options && generatedOptions.length > 0) || componentData.extraOptions"
+      >
         <div class="component-detail-options">
           <div class="component-detail-options-title">
             选项
@@ -35,12 +37,16 @@
           </div>
           <slot></slot>
         </div>
-        <div class="component-detail-separator"></div>
+        <!-- <div class="component-detail-separator"></div> -->
       </template>
       <template v-if="!(componentData.options && !componentData.description)">
-        <ComponentDescription :component-data="componentData" />
-        <div class="component-detail-separator"></div>
+        <ComponentDescription
+          class="component-detail-description"
+          :component-data="componentData"
+        />
+        <!-- <div class="component-detail-separator"></div> -->
       </template>
+      <div class="component-detail-grow"></div>
       <div class="component-detail-internal-data">
         <div class="internal-name">
           内部名称: {{ componentData.name }}
@@ -113,7 +119,7 @@ export default Vue.extend({
   },
   computed: {
     generatedOptions() {
-      return Object.entries(this.componentData.options as ComponentOptions).filter(
+      return Object.entries((this.componentData.options ?? {}) as ComponentOptions).filter(
         ([, option]) => !option.hidden,
       )
     },
@@ -137,6 +143,11 @@ export default Vue.extend({
 .component-detail {
   min-width: 264px;
   width: 264px;
+  flex: 1;
+  background-color: inherit;
+  border-radius: 7px;
+  @include no-scrollbar();
+  @include v-stretch();
   &-separator {
     height: 1px;
     background-color: #8882;
@@ -147,7 +158,12 @@ export default Vue.extend({
   &-header {
     @include h-center();
     justify-content: space-between;
-    margin-bottom: 12px;
+    padding: 12px;
+    background-color: inherit;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
     .display-name {
       font-weight: bold;
       font-size: 16px;
@@ -159,13 +175,16 @@ export default Vue.extend({
       }
     }
   }
-  .component-description:not(:last-child) {
-    margin-bottom: 12px;
+  &-description:not(:last-child) {
+    padding: 12px 12px 0;
+    // max-height: 9em;
+    // line-height: 1.5;
+    // @include no-scrollbar();
   }
   &-tags {
     @include h-center();
     flex-wrap: wrap;
-    margin-bottom: 8px;
+    padding: 0 8px 8px;
     .tag {
       @include h-center();
       @include card();
@@ -185,7 +204,13 @@ export default Vue.extend({
   }
   &-internal-data {
     @include h-center();
+    position: sticky;
+    bottom: 0;
     justify-content: space-between;
+    min-height: 24px;
+    box-sizing: content-box;
+    background-color: inherit;
+    padding: 8px 12px;
 
     .internal-name {
       opacity: 0.5;
@@ -238,7 +263,11 @@ export default Vue.extend({
     }
   }
   &-options {
-    margin-bottom: 12px;
+    padding: 8px 12px;
+    // flex: 1 0 0;
+    // height: 0;
+    // @include no-scrollbar();
+
     .component-detail-options-title {
       font-weight: bold;
       font-size: 14px;
@@ -247,6 +276,9 @@ export default Vue.extend({
     .generated-option:not(:last-child) {
       margin-bottom: 4px;
     }
+  }
+  &-grow {
+    flex: 1;
   }
 }
 </style>

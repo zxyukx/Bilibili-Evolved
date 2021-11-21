@@ -113,11 +113,10 @@ export default {
   & > .sidebar {
     position: fixed;
     top: 50%;
-    z-index: 1000;
+    z-index: 1002;
     transform: translateX(calc(-50% * var(--direction))) translateY(-50%);
 
-    body.player-mode-webfullscreen &,
-    body.player-fullscreen-fix & {
+    @include on-fullscreen {
       z-index: 1;
     }
     & > * {

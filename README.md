@@ -1,6 +1,10 @@
-# Bilibili Evolved
+<div align="center"><img id="Bilibili-Evolved" width="500" alt="Bilibili Evolved" src="https://cdn.jsdelivr.net/gh/the1812/Bilibili-Evolved@preview/images/bilibili-evolved-wide-color.svg"></div>
+<br>
+<div align="center">
 
 「 强大的哔哩哔哩增强脚本 」
+
+</div>
 
 [📦 安装](#安装)
 
@@ -40,7 +44,7 @@
 - `浏览`: 载入本地的功能文件.
 - `在线`: 打开在线仓库窗口.
 
-> 在线链接需要对应文件的直链, GitHub Raw 或 jsDelivr 都可以. 批量安装时逐行粘贴链接即可.
+> 用链接安装需要对应文件的直链, GitHub Raw 或 jsDelivr 都可以. 批量安装时逐行粘贴链接即可.
 
 如果你曾经使用过 v1 版, 可以利用 `v1 设置迁移` 组件将旧设置导入到 v2 中, 该工具将自动把里面开启的设置对应的组件下载并安装, 使用方法可以参考[这个文档](./doc/v1-migrate.md).
 
@@ -148,8 +152,5 @@ TODO (之前那个 contributors badge 抽风了)
 
 ## [Steam CSS](https://github.com/the1812/SteamCSS)
 为 [Steam](https://store.steampowered.com/) 的库和内置浏览器插入一段自定义的 CSS, 用于更换字体等
-
-## [Popcap Patches](https://github.com/the1812/Popcap-Patches)
-Popcap游戏3D加速补丁制作器, 可修复宝石迷阵, 祖玛等游戏
 
 ----
