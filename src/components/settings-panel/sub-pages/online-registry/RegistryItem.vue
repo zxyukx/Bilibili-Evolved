@@ -131,6 +131,9 @@ export default Vue.extend({
           urls.map(async url => installFeature(url)),
         )
         this.checkInstalled()
+        if (this.item.type === 'pack') {
+          this.$emit('refresh')
+        }
       } catch (error) {
         logError(error)
       } finally {
@@ -201,11 +204,8 @@ export default Vue.extend({
   }
 }
 .online-registry-description {
-  // flex: 1 0 100%;
-  // transition: opacity 0.2s ease-out;
-  // opacity: 0.5;
   font-size: 13px;
-  // margin-top: 4px;
   @include markdown();
+  word-break: break-all;
 }
 </style>

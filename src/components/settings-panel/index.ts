@@ -12,6 +12,7 @@ export enum SettingsPanelDockSide {
   Left = '左侧',
   Right = '右侧',
 }
+
 const entry: ComponentEntry = async ({ metadata }) => {
   const { isIframe } = await import('@/core/utils')
   if (isIframe()) {

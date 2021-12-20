@@ -5,13 +5,6 @@
       <div class="online-registry-header-title">
         在线仓库
       </div>
-      <div class="online-registry-header-search">
-        <VIcon icon="search" :size="18" />
-        <TextBox
-          v-model="searchKeyword"
-          placeholder="搜索功能"
-        />
-      </div>
       <VIcon
         icon="mdi-refresh"
         :size="22"
@@ -20,12 +13,29 @@
         @click="fetchFeatures()"
       />
       <VIcon
-        icon="close"
-        :size="18"
+        icon="mdi-close"
+        :size="24"
         class="online-registry-header-close-icon"
         title="关闭"
         @click="popupOpen = false"
       />
+    </div>
+    <div class="online-registry-header">
+      <div class="online-registry-header-search">
+        <VIcon icon="search" :size="18" />
+        <TextBox
+          v-model="searchKeyword"
+          placeholder="搜索功能"
+        />
+      </div>
+      <div class="online-registry-header-branch">
+        分支:
+        <VDropdown v-model="selectedBranch" :items="registryBranches">
+          <template #item="{ item }">
+            {{ item }}
+          </template>
+        </VDropdown>
+      </div>
     </div>
     <div class="online-registry-separator"></div>
     <div ref="content" class="online-registry-content">
@@ -34,7 +44,9 @@
       <RegistryItem
         v-for="item of filteredList"
         :key="item.name"
+        ref="items"
         :item="item"
+        @refresh="checkInstalled"
       />
       <!-- <RegistryItem
         v-for="item of packList"
@@ -52,6 +64,7 @@ import { getGeneralSettings } from '@/core/settings'
 import { logError } from '@/core/utils/log'
 import {
   VIcon,
+  VDropdown,
   TextBox,
   VPopup,
   VLoading,
@@ -60,10 +73,13 @@ import {
 import Fuse from 'fuse.js'
 import { DocSourceItem } from 'registry/lib/docs'
 import RegistryItem from './RegistryItem.vue'
+import { registryBranches } from './third-party'
 
+const general = getGeneralSettings()
 export default Vue.extend({
   components: {
     VIcon,
+    VDropdown,
     TextBox,
     VPopup,
     RegistryItem,
@@ -77,6 +93,11 @@ export default Vue.extend({
     },
   },
   data() {
+    const branches = [
+      general.registryBranch,
+      meta.compilationInfo.branch,
+      registryBranches[0],
+    ].filter(it => registryBranches.includes(it) && Boolean(it))
     return {
       searchKeyword: '',
       popupOpen: false,
@@ -85,6 +106,8 @@ export default Vue.extend({
       filteredList: [],
       // packList: [],
       fuse: null,
+      registryBranches,
+      selectedBranch: branches[0],
     }
   },
   watch: {
@@ -98,6 +121,10 @@ export default Vue.extend({
       this.filteredList = fuseResult.map(it => it.item)
       this.$nextTick().then(() => this.$refs.content.scrollTo(0, 0))
     }, 200),
+    selectedBranch(newBranch: string) {
+      general.registryBranch = newBranch
+      this.fetchFeatures()
+    },
   },
   mounted() {
     this.fetchFeatures()
@@ -107,10 +134,11 @@ export default Vue.extend({
       if (this.loading) {
         return
       }
+      const fetchPath = cdnRoots[general.cdnRoot](this.selectedBranch)
       try {
         this.loading = true
-        const featureListUrl = `${cdnRoots[getGeneralSettings().cdnRoot](meta.compilationInfo.branch)}doc/features/features.json`
-        const packListUrl = `${cdnRoots[getGeneralSettings().cdnRoot](meta.compilationInfo.branch)}doc/features/pack/pack.json`
+        const featureListUrl = `${fetchPath}doc/features/features.json`
+        const packListUrl = `${fetchPath}doc/features/pack/pack.json`
         const featureList = await monkey({
           url: featureListUrl,
           responseType: 'json',
@@ -119,6 +147,10 @@ export default Vue.extend({
           url: packListUrl,
           responseType: 'json',
         })
+        if (!Array.isArray(featureList) || !Array.isArray(packList)) {
+          console.error('Fetch failed:', featureList, packList, featureListUrl, packListUrl)
+          throw new Error('获取在线仓库数据失败, 请尝试在通用设置中设置其他更新源, 然后再试一次.')
+        }
         this.list = [...packList, ...featureList]
         this.fuse = new Fuse(this.list, {
           keys: ['displayName', 'name', 'description'],
@@ -130,6 +162,9 @@ export default Vue.extend({
       } finally {
         this.loading = false
       }
+    },
+    checkInstalled() {
+      this.$refs.items?.forEach((item: any) => item.checkInstalled())
     },
   },
 })
@@ -153,14 +188,17 @@ export default Vue.extend({
   }
   &-header {
     padding: 12px;
-    @include h-center(6px);
+    @include h-center(12px);
+    & + & {
+      padding-top: 0;
+    }
     &-title {
+      flex: 1;
       font-size: 18px;
       font-weight: bold;
     }
     &-search {
       flex: 1;
-      margin: 0 12px;
       justify-content: center;
       @include h-center(6px);
       .be-textbox {
@@ -169,9 +207,13 @@ export default Vue.extend({
         font-size: 12px;
       }
     }
+    &-branch {
+      @include h-center(6px);
+      font-size: 12px;
+    }
     &-refresh-icon,
     &-close-icon {
-      padding: 4px;
+      padding: 2px;
       cursor: pointer;
       transition: .3s ease-out;
       &:hover {
@@ -179,7 +221,7 @@ export default Vue.extend({
       }
     }
     &-refresh-icon {
-      padding: 2px;
+      padding: 3px;
       &:hover {
         transform: rotate(360deg);
       }

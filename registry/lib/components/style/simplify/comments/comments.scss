@@ -1,3 +1,5 @@
+@import "common";
+
 @mixin mdi($content) {
   background: none !important;
   color: #000;
@@ -210,6 +212,7 @@
   .nameplate,
   .comment-header .tabs-order li.on::after,
   .true-love,
+  .medal,
   .medal-level,
   .reply-notice,
   .sailing {
@@ -245,6 +248,9 @@
       .info {
         margin-top: 0 !important;
         @include orders();
+        > * {
+          @include h-center();
+        }
         .like,
         .hate {
           i {
@@ -506,4 +512,7 @@ body.dark .panel-area .bb-comment {
 }
 .v-wrap #comment {
   z-index: 21 !important;
+}
+.l-con .tag-channel-pane {
+  z-index: 22 !important;
 }

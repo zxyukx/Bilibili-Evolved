@@ -96,7 +96,7 @@ const downloadDash = async (
     otype: 'json',
     fourk: 1,
     fnver: 0,
-    fnval: 80,
+    fnval: 2000,
   }
   const api = `https://api.bilibili.com/x/player/playurl?${formData(params)}`
   const data = await bilibiliApi(
@@ -107,7 +107,12 @@ const downloadDash = async (
     throw new Error('此视频没有 dash 格式, 请改用其他格式.')
   }
   const currentQuality = allQualities.find(q => q.value === data.quality)
-  const { duration, video, audio } = data.dash
+  const {
+    duration,
+    video,
+    audio,
+    dolby,
+  } = data.dash
   const videoDashes: VideoDash[] = (video as any[])
     .filter((d: any) => d.id === currentQuality.value)
     .map((d: any): VideoDash => {
@@ -150,6 +155,17 @@ const downloadDash = async (
     downloadUrl: (d.baseUrl || d.base_url || '').replace('http:', 'https:'),
     duration,
   })).filter(d => dashFilters.audio(d))
+  if (dolby) {
+    audioDashes.push(...dolby.audio?.map((d: any): AudioDash => ({
+      type: 'audio',
+      bandWidth: d.bandwidth,
+      codecs: d.codecs,
+      codecId: -1, // unknown id
+      backupUrls: [],
+      downloadUrl: (d.baseUrl || d.base_url || '').replace('http:', 'https:'),
+      duration,
+    })) ?? [])
+  }
   const fragments: DownloadVideoFragment[] = dashToFragments({
     audioDashes,
     videoDashes,

@@ -273,9 +273,11 @@ export default Vue.extend({
 </script>
 <style lang="scss">
 @import "common";
+@import "../popup";
+
 .custom-navbar .favorites-list {
   width: 380px;
-  height: 600px;
+  @include navbar-popup-height();
   font-size: 12px;
   @include v-stretch();
   justify-content: center;
@@ -288,12 +290,15 @@ export default Vue.extend({
     text-align: center;
   }
   .header {
-    @include h-center();
+    @include h-stretch();
     justify-content: space-between;
     margin: 16px 12px;
     .search {
       flex: 1;
       margin-left: 8px;
+      .be-textbox {
+        height: 100%;
+      }
     }
     .list-select {
       flex-shrink: 0;

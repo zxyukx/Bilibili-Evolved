@@ -1,7 +1,8 @@
+import { getDescriptionMarkdown } from '@/components/description'
 import { PluginMetadata } from '@/plugins/plugin'
 import { DocSource, DocSourceItem } from '.'
 import { getId } from '../../webpack/id'
-import { thirdPartyPlugins } from './third-party'
+import { getThirdPartyDescription, thirdPartyPlugins } from './third-party'
 
 export const getPluginsDoc: DocSource = async rootPath => {
   const pluginsContext = require.context('../plugins', true, /index\.ts$/)
@@ -27,15 +28,17 @@ export const getPluginsDoc: DocSource = async rootPath => {
         name,
         displayName,
       } = it.plugin
+      const description = getDescriptionMarkdown(it.plugin)
       return {
         type: 'plugin',
         name,
         displayName,
+        description,
         fullRelativePath,
         fullAbsolutePath,
       } as DocSourceItem
     })
-    .concat(thirdPartyPlugins)
+    .concat(thirdPartyPlugins.map(getThirdPartyDescription))
   return {
     title: '插件',
     items: pluginsPaths,

@@ -12,38 +12,43 @@ export default Vue.extend({
   components: {
     VIcon,
   },
-  // data() {
-  //   return {
-  //     seasonLogoUrl: '',
-  //   }
-  // },
-  // async created() {
-  //   addComponentListener(
-  //     'customNavbar.seasonLogo',
-  //     async (value: boolean) => {
-  //       if (!value) {
-  //         this.seasonLogoUrl = ''
-  //         return
-  //       }
-  //       const json = await getJson(
-  //         'https://api.bilibili.com/x/web-show/res/locs?pf=0&ids=142',
-  //       )
-  //       if (json.code !== 0) {
-  //         this.seasonLogoUrl = ''
-  //         return
-  //       }
-  //       this.seasonLogoUrl = lodash.get(json, 'data[142][0].litpic', '').replace(
-  //         'http:',
-  //         'https:',
-  //       )
-  //     },
-  //     true,
-  //   )
-  // },
+  data() {
+    return {
+      seasonLogoUrl: '',
+    }
+  },
+  watch: {
+    seasonLogoUrl() {
+      document.body.classList.toggle('season-logo-enabled', Boolean(this.seasonLogoUrl))
+    },
+  },
+  async created() {
+    addComponentListener(
+      'customNavbar.seasonLogo',
+      async (value: boolean) => {
+        if (!value) {
+          this.seasonLogoUrl = ''
+          return
+        }
+        const json = await getJson(
+          'https://api.bilibili.com/x/web-show/page/header?resource_id=1',
+        )
+        if (json.code !== 0) {
+          this.seasonLogoUrl = ''
+          return
+        }
+        this.seasonLogoUrl = lodash.get(json, 'data.litpic', '').replace(
+          'http:',
+          'https:',
+        )
+      },
+      true,
+    )
+  },
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .custom-navbar-logo {
   width: auto;
   margin: 0 4px;
@@ -54,6 +59,12 @@ export default Vue.extend({
   }
   &.season {
     transform: scale(1.15);
+    filter: drop-shadow(0 0 2px #0002);
+  }
+}
+body.season-logo-enabled {
+  .bili-header .inner-logo {
+    display: none !important;
   }
 }
 </style>

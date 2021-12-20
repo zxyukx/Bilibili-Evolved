@@ -129,6 +129,9 @@ export default Vue.extend({
   },
   methods: {
     toggleWatchlater,
+    popupRefresh() {
+      this.updateList()
+    },
     async updateList() {
       const rawList = await getWatchlaterList(true)
       if (!rawList) {
@@ -199,9 +202,10 @@ export default Vue.extend({
 </script>
 <style lang="scss">
 @import "common";
+@import "../popup";
+
 .custom-navbar .watchlater-list {
-  min-height: 200px;
-  max-height: 600px;
+  @include navbar-popup-height();
   width: 380px;
   font-size: 12px;
   display: flex;
@@ -228,7 +232,7 @@ export default Vue.extend({
     cursor: pointer;
   }
   .header {
-    @include h-center();
+    @include h-stretch();
     justify-content: space-between;
     align-self: stretch;
     margin: 16px 12px;
@@ -236,6 +240,9 @@ export default Vue.extend({
       position: relative;
       flex-grow: 1;
       margin-right: 8px;
+      .be-textbox {
+        height: 100%;
+      }
     }
     .operations {
       @include h-center();

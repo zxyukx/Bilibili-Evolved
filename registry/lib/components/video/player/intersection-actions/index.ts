@@ -1,4 +1,5 @@
 import { ComponentMetadata } from '@/components/types'
+import { playerAgent } from '@/components/video/player-agent'
 import { lightOff, lightOn } from '@/components/video/player-light'
 import { videoChange } from '@/core/observer'
 import { addComponentListener, getComponentSettings } from '@/core/settings'
@@ -22,9 +23,18 @@ export const component: ComponentMetadata = {
       pause: boolean
       light: boolean
     }
+    const { query: { video } } = playerAgent
 
-    let videoEl: HTMLVideoElement
-    let playerWrap: HTMLElement
+    const videoEl = await video.element() as HTMLVideoElement
+    // const playerWrap = await video.wrap()
+    // 如果有 video-player 优先的使用该盒子
+    // 因为在稍后再看页面（medialist）视频也有 player-wrap
+    // 选择 player-wrap 会导致闪烁。
+    const playerWrap = (
+      document.getElementById('video-player')
+        ?? (dq('.player-wrap') || dq('.player-module'))
+      ) as HTMLElement
+
     let observer: IntersectionObserver
     let intersectionLock = true // Lock intersection action
 
@@ -99,18 +109,21 @@ export const component: ComponentMetadata = {
 
     function mountPlayListener() {
       videoChange(async () => {
+        if (playerAgent.isAutoPlay()) {
+          addPlayerOutEvent()
+        }
         videoEl.addEventListener('play', addPlayerOutEvent)
         // videoEl.addEventListener('pause', removePlayerOutEvent);
         videoEl.addEventListener('ended', removePlayerOutEvent)
       })
     }
+
     addComponentListener(`${metadata.name}.triggerLocation`, (value: IntersectionMode) => {
       removePlayerOutEvent()
       observer = createObserver(value)
       addPlayerOutEvent()
     })
-    videoEl = dq('.bilibili-player-video video') as HTMLVideoElement
-    playerWrap = (dq('.player-wrap') || dq('.player-module')) as HTMLElement
+
     observer = createObserver()
     mountPlayListener()
   },

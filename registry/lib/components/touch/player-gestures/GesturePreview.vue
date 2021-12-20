@@ -16,7 +16,7 @@
         <div class="videoshot" :style="videoshotStyle"></div>
         <div v-show="preview.progress !== null" class="preview">
           <div
-            v-if="preview.progress"
+            v-if="!progressNaN"
             class="diff"
           >
             {{ (preview.progress - store.progress) | progressDiff }}
@@ -24,7 +24,7 @@
           <div
             class="seek-mode"
           >
-            {{ preview.progress ? preview.seekMode : '取消调整' }}
+            {{ !progressNaN ? preview.seekMode : '取消调整' }}
           </div>
         </div>
         <div v-show="preview.progress === null" class="name">
@@ -33,7 +33,7 @@
         <div
           class="progress-label"
         >
-          {{ (preview.progress || store.progress ) | progress }}
+          {{ (progressValid ? preview.progress : store.progress) | progress }}
         </div>
       </div>
       <div class="volume">
@@ -50,7 +50,7 @@
     </div>
     <div class="progress-bar">
       <ProgressBar
-        :progress="(preview.progress || store.progress)"
+        :progress="progressValid ? preview.progress : store.progress"
         :max="video.duration"
       ></ProgressBar>
     </div>
@@ -65,6 +65,7 @@ import { fixed } from '@/core/utils'
 import { formatPercent, formatDuration } from '@/core/utils/formatters'
 import { GesturePreviewParams, ProgressSeekMode } from './gesture-preview'
 import { Videoshot } from './videoshot'
+import { syncVolumeUI } from './volume'
 
 /**
  * 将秒数转为中文时间的小函数
@@ -133,16 +134,17 @@ export default Vue.extend({
       },
     }
   },
-  // computed: lodash.fromPairs(
-  //   ['progress', 'brightness', 'volume'].map(type => {
-  //     return [
-  //       type,
-  //       function computed() {
-  //         return this.preview[type] || this.store[type]
-  //       },
-  //     ]
-  //   }),
-  // ),
+  computed: {
+    progressNaN() {
+      return Number.isNaN(this.preview.progress)
+    },
+    progressNull() {
+      return this.preview.progress === null
+    },
+    progressValid() {
+      return !this.progressNaN && !this.progressNull
+    },
+  },
   methods: {
     sync() {
       const video = dq('video') as HTMLVideoElement
@@ -170,7 +172,7 @@ export default Vue.extend({
           this.video.duration,
         )
         const videoshot = this.videoshot as Videoshot
-        videoshot.getVideoshot(progress).then(style => {
+        videoshot.getVideoshot(this.preview.progress).then(style => {
           this.videoshotStyle = style
         })
       } else {
@@ -192,6 +194,9 @@ export default Vue.extend({
     endPreview() {
       if (!unsafeWindow.touchGestureDebug) {
         this.opened = false
+      }
+      if (this.store.volume !== this.preview.volume) {
+        syncVolumeUI(this.preview.volume)
       }
       if (Number.isNaN(this.preview.progress)) {
         this.preview.progress = null
@@ -217,7 +222,7 @@ export default Vue.extend({
         setVolume(video, this.preview.volume)
       } else if (progress !== undefined) {
         const { setProgress } = await import('./progress')
-        setProgress(video, this.preview.progress)
+        setProgress(video, progress)
       }
     },
   },

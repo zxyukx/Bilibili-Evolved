@@ -37,10 +37,10 @@ export const installComponent = async (code: string) => {
   if (existingComponent) {
     existingComponent.code = code
     existingComponent.metadata = userMetadata
-    const existingOptions = existingComponent.settings.options
-    const newSettings: ComponentSettings = lodash.defaultsDeep(
-      existingComponent.settings,
-      componentToSettings(component),
+    const defaultSettings = componentToSettings(component)
+    lodash.defaultsDeep(
+      existingComponent.settings.options,
+      lodash.pickBy(defaultSettings.options, value => !Array.isArray(value)),
     )
     Object.entries(existingOptions).forEach(([name, option]) => {
       if (Array.isArray(option)) {

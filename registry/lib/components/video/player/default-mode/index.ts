@@ -40,22 +40,19 @@ const entry: ComponentEntry = async ({ settings: { options } }) => {
   if (!video) {
     return
   }
-  const autoPlay = lodash.get(
-    JSON.parse(localStorage.getItem('bilibili_player_settings')),
-    'video_status.autoplay',
-    false,
-  )
   const action = actions.get(options.mode)
-  const onplay = () => {
-    const isNormalMode = !dq('body[class*=player-mode-]')
-    if (isNormalMode) {
-      action()
-    }
-  }
-  if (options.applyOnPlay && !autoPlay) {
-    video.addEventListener('play', onplay, { once: true })
+  // https://github.com/the1812/Bilibili-Evolved/issues/2408
+  // 也许以前切P是会刷新页面，但现在(2.7+)的播放器切P是不刷新页面的，所以不需要判断
+  // const onplay = () => {
+  //   const isNormalMode = !dq('body[class*=player-mode-]')
+  //   if (isNormalMode) {
+  //     action()
+  //   }
+  // }
+  if (options.applyOnPlay && !playerAgent.isAutoPlay()) {
+    video.addEventListener('play', action, { once: true })
   } else {
-    onplay()
+    action()
   }
 }
 export const component: ComponentMetadata = {
@@ -64,7 +61,7 @@ export const component: ComponentMetadata = {
   entry,
   tags: [componentsTags.video],
   description: {
-    'zh-CN': '控制是否使用默认播放器模式, 可以为`常规`, `宽屏`, `网页全屏`或`全屏`.',
+    'zh-CN': '控制是否使用默认播放器模式, 可以为`常规`, `宽屏`, `网页全屏`或`全屏`. 注意: 不能和其他影响定位的功能一同使用, 例如播放器定位. (相关讨论: [#483](https://github.com/the1812/Bilibili-Evolved/issues/483))',
     'en-US': 'Set the default player mode. Could be `Normal`, `Widescreen`, `Web fullscreen` or `Fullscreen`.',
     'ja-JP': 'デフォルト・プレーヤー・モードが使用するかどうかを制御する、 例えば`常规`、`宽屏`、 `网页全屏`か`全屏`.',
   },
