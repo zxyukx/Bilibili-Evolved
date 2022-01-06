@@ -1,5 +1,6 @@
 import { ComponentMetadata, ComponentEntry } from '@/components/types'
 import { playerAgent } from '@/components/video/player-agent'
+import { videoChange } from '@/core/observer'
 import { addComponentListener } from '@/core/settings'
 import { allVideoUrls } from '@/core/utils/urls'
 
@@ -33,8 +34,6 @@ enum Position {
 }
 
 const entry: ComponentEntry = async ({ settings: { options }, metadata }) => {
-  const video = await playerAgent.query.video.wrap()
-
   const time = document.createElement('span')
   time.id = 'cur-time'
   const style = {
@@ -73,7 +72,10 @@ const entry: ComponentEntry = async ({ settings: { options }, metadata }) => {
     }
   }, true)
 
-  video.appendChild(time)
+  videoChange(async () => {
+    const video = await playerAgent.query.video.wrap()
+    video.appendChild(time)
+  })
 
   updateFunc = () => {
     const t = new Date()
