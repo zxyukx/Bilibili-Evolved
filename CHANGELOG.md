@@ -1,5 +1,33 @@
 # 更新日志
 
+## v2.0.10-preview
+`[预览] v2.0.10` `2022-01-04`
+- 修复专栏中视频卡片布局错位. (PR #2776 by [FoundTheWOUT](https://github.com/FoundTheWOUT))
+- 尝试支持禁用 b 站切换播放器模式时的定位效果. (#483)
+- 自定义顶栏:
+  - 修复主站中的链接错误. (#2774)
+  - 视频卡片的链接带上 `/video` 避免二次跳转. (#2779)
+
+开发者相关:
+- 稍后再看的错误处理统一移动到 core 中 (src/components/video/watchlater.ts)
+- `isComponentEnabled` 能够对不存在的组件返回 `false` 了.
+- 关闭 preview 分支的 CI 触发, 方便多个 PR 的合并.
+- 对组件 / 插件的 watch task 默认启用 webpack 的 mode=development 以提供 source map.
+
+## v2.0.9-preview
+`[预览] v2.0.9` `2021-12-24`
+- 清爽首页还是上周图里的进度, 支持活动, 热门, 动态, 栏目, 暂不支持分区和排行榜, 板块排序也还没做图形界面. 如果你只是需要上面那四个板块, 那么现在就可以试用起来了, 链接是[这个](https://raw.githubusercontent.com/the1812/Bilibili-Evolved/preview/registry/dist/components/style/home-redesign/fresh.js). (在线仓库里不开放, 因为还是半成品)
+- 修复顶栏在 macOS 下输入法回车会直接触发搜索. (#2738)
+- 修复专栏里的视频卡片样式问题. (#2709)
+- 修复番剧区首次打开下载视频时按钮无法点击. (#2725)
+- 修复顶栏的 `动态弹窗` - `所有动态` 没有在新标签页打开.
+- 修复 `复制评论链接` 没清理 URL hash 参数. (#2641)
+- 修复 `夜间模式` 下评论的输入框高度无限增长. (#2633, PR #2764 by [timongh](https://github.com/timongh))
+- 重新实现了 `直播全屏包裹`, 修复某些时候弹窗位置不正确. (~~虽然我没遇到过~~) (PR #2758 by [timongh](https://github.com/timongh))
+- 修复顶栏的主页弹窗在低分辨率下内容溢出. (#2610, PR #2757 by [timongh](https://github.com/timongh))
+- 调整了 webpack 打包配置 (使用 webpack 5 asset modules, 移除 raw-loader), 之前有 clone 的开发者们记得重新 yarn 更新一下包.
+- 尝试把 CI 构建调整为 Release 时构建, 而不是每次 push 时构建.
+
 ## v2.0.8
 `v2.0.8` `2021-12-14`
 - 修复 v1 中选择不再提示后变成弹另一种提示. (#2693)
