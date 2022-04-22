@@ -3,21 +3,30 @@ import { TestPattern } from '../common-types'
 
 /** 稍后再看页面 */
 export const watchlaterUrls = [
-  '//www.bilibili.com/medialist/play/watchlater/',
+  '//www.bilibili.com/medialist/play/watchlater',
 ]
 /** 收藏夹连播页面 */
 export const favoriteListUrls = [
   '//www.bilibili.com/medialist/play/ml',
 ]
+/** UP 主视频连播页面 */
+export const upListUrls = [
+  /\/\/www\.bilibili\.com\/medialist\/play\/\d+/,
+]
 /** 合集类页面 */
 export const mediaListUrls = [
   ...watchlaterUrls,
   ...favoriteListUrls,
+  ...upListUrls,
+]
+/** 拜年纪等类似活动页面 */
+export const festivalUrls = [
+  /\/\/www\.bilibili\.com\/festival\//,
 ]
 /** 含有普通视频的页面 */
 export const videoUrls = [
   '//www.bilibili.com/video/',
-  /\/\/www\.bilibili\.com\/festival\/(\d+)bnj/,
+  ...festivalUrls,
   ...mediaListUrls,
 ]
 /** 含有番剧的页面 */
@@ -44,19 +53,11 @@ export const mainSiteUrls = [
   /^https:\/\/www\.bilibili\.com\/$/,
   /^https:\/\/www\.bilibili\.com\/([^\/]+)\.html$/,
   /^https:\/\/www\.bilibili\.com\/watchlater\/#\/list$/,
+  'https://www.bilibili.com/account/',
 ]
 /** 直播间页面 */
 export const liveUrls = [
   /^https:\/\/live\.bilibili\.com\/(blanc\/)?[\d]+/,
-]
-/** 不支持夜间模式的页面 */
-export const darkExcludes = [
-  '//member.bilibili.com/v2',
-  '//member.bilibili.com/video/upload.html',
-  '//member.bilibili.com/article-text/home',
-  '//www.bilibili.com/audio/submit/',
-  '//member.bilibili.com/studio/bs-editor/projects',
-  '//www.bilibili.com/s/video/',
 ]
 /** 除动态详情页以外的含有动态的页面 */
 export const feedsUrlsWithoutDetail = [

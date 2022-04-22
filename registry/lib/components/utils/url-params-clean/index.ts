@@ -1,7 +1,10 @@
 import { registerAndGetData } from '@/plugins/data'
 import { ComponentMetadata } from '@/components/types'
-import { isNotHtml } from '@/core/utils'
+import { isNotHtml, matchPattern } from '@/core/utils'
+import { useScopedConsole } from '@/core/utils/log'
 
+const displayName = '网址参数清理'
+const console = useScopedConsole(displayName)
 const entry = async () => {
   if (isNotHtml()) {
     return
@@ -43,6 +46,7 @@ const entry = async () => {
     'bsource',
     'spm',
     'hotRank',
+    '-Arouter',
   ]
   const [blockParams] = registerAndGetData('urlParamsClean.params', builtInBlockParams)
   const builtInSiteSpecifiedParams = [
@@ -60,6 +64,8 @@ const entry = async () => {
     },
   ]
   const [siteSpecifiedParams] = registerAndGetData('urlParamsClean.siteSpecifiedParams', builtInSiteSpecifiedParams)
+  const builtInTailingSlash: { match: string | RegExp }[] = []
+  const [tailingSlash] = registerAndGetData('urlParamsClean.tailingSlash', builtInTailingSlash)
 
   const clean = () => {
     const urlParams = window.location.search.substring(1).split('&')
@@ -78,11 +84,16 @@ const entry = async () => {
       return true
     })
     const filteredParamsString = filteredParams.join('&')
-    const url = document.URL.replace(window.location.search, '')
+    let url = document.URL.replace(window.location.search, '')
+    tailingSlash.forEach(({ match }) => {
+      if (matchPattern(url, match) && url.endsWith('/')) {
+        url = url.slice(0, url.length - 1)
+      }
+    })
     const query = filteredParamsString ? (`?${filteredParamsString}`) : ''
     const newUrl = url + query
     if (newUrl !== document.URL) {
-      console.log('[URL params clean]', document.URL, newUrl)
+      console.log(document.URL, newUrl)
       window.history.replaceState({}, document.title, newUrl)
     }
   }
@@ -94,7 +105,7 @@ const entry = async () => {
 }
 export const component: ComponentMetadata = {
   name: 'urlParamsClean',
-  displayName: '网址参数清理',
+  displayName,
   entry,
   description: {
     'zh-CN': '自动删除网址中的多余跟踪参数. 请注意这会导致浏览器历史记录出现重复的标题 (分别是转换前后的网址).',
@@ -104,5 +115,6 @@ export const component: ComponentMetadata = {
   ],
   urlExclude: [
     /game\.bilibili\.com\/fgo/,
+    /live\.bilibili\.com\/p\/html\/live-app-hotrank\//,
   ],
 }

@@ -62,13 +62,98 @@ export const dqa: DocumentQuerySelectorAll = (
   }
   return Array.from((selectorOrElement as Element).querySelectorAll(bwpVideoFilter(scopedSelector)))
 }
+type DocumentEvaluate = {
+  (xpathExpression: string): XPathResult
+  (xpathExpression: string, contextNode: Node): XPathResult
+  (xpathExpression: string, contextNode: Node, type: number): XPathResult
+  (xpathExpression: string, contextNode: Node, type: number, result: XPathResult): XPathResult
+}
+export const de: DocumentEvaluate = (
+  xpathExpression: string,
+  contextNode?: Node,
+  type?: number,
+  result?: XPathResult,
+) => document.evaluate(xpathExpression, contextNode, null, type, result)
+type DocumentEvaluateAll = {
+  (xpathExpression: string): Node[]
+  (xpathExpression: string, contextNode: Node): Node[]
+  (xpathExpression: string, contextNode: Node, order: boolean): Node[]
+  (xpathExpression: string, contextNode: Node, order: boolean, result: XPathResult): Node[]
+}
+export const dea: DocumentEvaluateAll = (
+  xpathExpression: string,
+  contextNode?: Node,
+  order?: boolean,
+  result?: XPathResult,
+) => {
+  const xpathResult = de(
+    xpathExpression,
+    contextNode,
+    order ? XPathResult.ORDERED_NODE_SNAPSHOT_TYPE : XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
+    result,
+  )
+
+  return Array.from({ length: xpathResult.snapshotLength }, (_, i) => xpathResult.snapshotItem(i))
+}
+type DocumentEvaluateAllIterable = {
+  (xpathExpression: string): Iterable<Node>
+  (xpathExpression: string, contextNode: Node): Iterable<Node>
+  (xpathExpression: string, contextNode: Node, order: boolean): Iterable<Node>
+  (xpathExpression: string, contextNode: Node, order: boolean, result: XPathResult): Iterable<Node>
+}
+export const deai: DocumentEvaluateAllIterable = (
+  xpathExpression: string,
+  contextNode?: Node,
+  order?: boolean,
+  result?: XPathResult,
+) => {
+  const xpathResult = de(
+    xpathExpression,
+    contextNode,
+    order ? XPathResult.ORDERED_NODE_ITERATOR_TYPE : XPathResult.UNORDERED_NODE_ITERATOR_TYPE,
+    result,
+  )
+
+  return {
+    [Symbol.iterator]: () => ({
+      next: () => {
+        let node = null
+        do {
+          node = xpathResult.iterateNext()
+          return node
+            ? ({ done: false, value: node } as { done: false, value: Node })
+            : ({ done: true } as { done: true, value: any })
+        } while (node)
+      },
+    }),
+  }
+}
+type DocumentEvaluateSingle = {
+  <T extends Node>(xpathExpression: string): T | null
+  <T extends Node>(xpathExpression: string, contextNode: Node): T | null
+  <T extends Node>(xpathExpression: string, contextNode: Node, result: XPathResult): T | null
+}
+export const des: DocumentEvaluateSingle = <T extends Node>(
+  xpathExpression: string, contextNode?: Node, result?: XPathResult,
+) => de(
+  xpathExpression,
+  contextNode,
+  XPathResult.FIRST_ORDERED_NODE_TYPE,
+  result,
+).singleNodeValue as (T | null)
 /** 空函数 */
 export const none = () => {
   // Do nothing
 }
 /** 页面是否使用了 Wasm 播放器 */
-// eslint-disable-next-line no-underscore-dangle
-export const isBwpVideo = () => unsafeWindow.__ENABLE_WASM_PLAYER__ as boolean || Boolean(dq('bwp-video'))
+export const isBwpVideo = async () => {
+  const { hasVideo } = await import('../spin-query')
+  if (!(await hasVideo())) {
+    return false
+  }
+  // eslint-disable-next-line no-underscore-dangle
+  return unsafeWindow.__ENABLE_WASM_PLAYER__ as boolean || Boolean(dq('#bilibili-player bwp-video'))
+}
 /**
  * 等待一定时间
  * @param time 延迟的毫秒数
@@ -92,10 +177,22 @@ export const matchUrlPattern = (pattern: string | RegExp) => (
  * @param module Vue组件模块对象
  * @param target 组件的挂载目标元素, 省略时不挂载直接返回
  */
-export const mountVueComponent = <T>(module: VueModule, target?: Element | string) => {
-  const instance = new Vue('default' in module ? module.default : module)
-  // const instance = new Vue({ render: h => h('default' in module ? module.default : module) })
-  return instance.$mount(target) as Vue & T
+export const mountVueComponent = <T>(
+  module: VueModule,
+  target?: Element | string,
+): Vue & T => {
+  const obj = 'default' in module ? module.default : module
+  const getInstance = (o: any) => {
+    if (o instanceof Function) {
+      // eslint-disable-next-line new-cap
+      return new o()
+    }
+    if (o.functional) {
+      return new (Vue.extend(o))()
+    }
+    return new Vue(o)
+  }
+  return getInstance(obj).$mount(target) as Vue & T
 }
 /** 是否处于其他网站的内嵌播放器中 */
 export const isEmbeddedPlayer = () => window.location.host === 'player.bilibili.com' || document.URL.startsWith('https://www.bilibili.com/html/player.html')
@@ -227,7 +324,7 @@ export const formData = (obj: Record<string, any>, config?: { encode?: boolean }
 /**
  * 移除一个数组中的元素
  * @param target 目标数组
- * @param property 数组元素判断
+ * @param predicate 数组元素判断
  */
 export const deleteValue = <ItemType> (
   target: ItemType[],
@@ -236,7 +333,24 @@ export const deleteValue = <ItemType> (
   const index = target.findIndex(predicate)
   if (index !== -1) {
     target.splice(index, 1)
+    return true
   }
+  return false
+}
+/**
+ * 移除一个数组中所有符合条件的元素
+ * @param target 目标数组
+ * @param predicate 数组元素判断
+ */
+export const deleteValues = <ItemType>(
+  target: ItemType[],
+  predicate: (value: ItemType, index: number, obj: ItemType[]) => boolean,
+) => {
+  let foundDeleteItem = false
+  do {
+    foundDeleteItem = deleteValue(target, predicate)
+  } while (foundDeleteItem)
+  return foundDeleteItem
 }
 
 type ClickEvent = (e: MouseEvent) => void
@@ -442,3 +556,18 @@ export const disableWindowScroll = async (action?: () => unknown | Promise<unkno
   }
   return restore
 }
+/**
+ * 生成一个对组件选项进行数字校验的函数, 可选择设置数字范围
+ * @param clampLower 最小值
+ * @param clampUpper 最大值
+ */
+export const getNumberValidator = (clampLower = -Infinity, clampUpper = Infinity) => (
+  (value: number, oldValue: number) => (
+    lodash.isNumber(Number(value)) ? lodash.clamp(value, clampLower, clampUpper) : oldValue
+  )
+)
+/**
+ * 将文本转换为 PascalCase
+ * @param text 文本
+ */
+export const pascalCase = (text: string) => lodash.upperFirst(lodash.camelCase(text))

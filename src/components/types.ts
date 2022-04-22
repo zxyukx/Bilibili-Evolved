@@ -42,7 +42,7 @@ export interface ComponentTag {
   /** 设置面板中的呈现顺序 */
   order: number
 }
-type ComponentOptionValidator<T> = (value: T) => T | undefined | null
+type ComponentOptionValidator<T> = (value: T, oldValue: T) => T | undefined | null
 /** 组件选项信息
  * @todo 需要 extends 出更具体的 Option 类型, 现在这样混一起太乱
  */
@@ -172,7 +172,7 @@ export interface FunctionalMetadata {
   /** 插件化数据定义 */
   plugin?: Optional<PluginMinimalData, 'name'>
   /** 额外想要展示在设置里的选项 UI */
-  extraOptions?: Executable<VueModule>
+  extraOptions?: () => Promise<VueModule>
   /** 设置匹配的URL, 不匹配则不运行此组件 */
   urlInclude?: TestPattern
   /** 设置不匹配的URL, 不匹配则不运行此组件, 优先级高于`urlInclude` */

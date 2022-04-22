@@ -4,11 +4,13 @@ import * as styledComponent from './styled-component'
 import * as description from './description'
 import * as feedsApis from './feeds/api'
 import BangumiCard from './feeds/BangumiCard.vue'
+import UpInfo from './feeds/UpInfo.vue'
 import VideoCard from './feeds/VideoCard.vue'
 import ColumnCard from './feeds/ColumnCard.vue'
 import * as disableProfilePopup from './feeds/disable-profile-popup'
 import * as notify from './feeds/notify'
 import * as assUtils from './video/ass-utils'
+import * as xmlUtils from './video/xml-utils'
 import * as playerAgent from './video/player-agent'
 import * as playerLight from './video/player-light'
 import * as videoDanmaku from './video/video-danmaku'
@@ -38,6 +40,7 @@ export const componentApis = {
   feeds: {
     api: feedsApis,
     BangumiCard,
+    UpInfo,
     VideoCard,
     ColumnCard,
     disableProfilePopup,
@@ -53,6 +56,7 @@ export const componentApis = {
     videoContextMenu,
     videoControlBar,
     watchlater,
+    xmlUtils,
   },
   live: {
     liveControlBar,

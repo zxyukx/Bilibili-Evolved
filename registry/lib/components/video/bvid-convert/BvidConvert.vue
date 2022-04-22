@@ -4,13 +4,13 @@
       <div class="bvid-convert-item">
         {{ aid }}
         <div class="bvid-convert-item-copy" title="复制链接" @click="copyLink('aid')">
-          <VIcon :size="16" :icon="aidCopyed ? 'mdi-check': 'mdi-link'" />
+          <VIcon :size="16" :icon="aidCopied ? 'mdi-check': 'mdi-link'" />
         </div>
       </div>
       <div class="bvid-convert-item">
         {{ bvid }}
         <div class="bvid-convert-item-copy" title="复制链接" @click="copyLink('bvid')">
-          <VIcon :size="16" :icon="bvidCopyed ? 'mdi-check': 'mdi-link'" />
+          <VIcon :size="16" :icon="bvidCopied ? 'mdi-check': 'mdi-link'" />
         </div>
       </div>
     </template>
@@ -20,16 +20,45 @@
 <script lang="ts">
 import { videoChange } from '@/core/observer'
 import { select } from '@/core/spin-query'
+import { matchUrlPattern } from '@/core/utils'
+import { bangumiUrls } from '@/core/utils/urls'
 import { VIcon } from '@/ui'
 
+enum CopyIdType {
+  Aid = 'aid',
+  Bvid = 'bvid',
+}
+const copyIds = [
+  CopyIdType.Aid,
+  CopyIdType.Bvid,
+]
+type LinkProvider = (context: { id: string, url: string, query: string }) => string
+const linkProviders: LinkProvider[] = [
+  // 参数类页面, 如 festival
+  ({ id, query }) => {
+    if (copyIds.some(copyId => query.includes(`${copyId}=`))) {
+      return `https://www.bilibili.com/video/${id}`
+    }
+    return null
+  },
+  // 番剧
+  ({ id }) => {
+    if (bangumiUrls.some(u => matchUrlPattern(u))) {
+      return `https://www.bilibili.com/video/${id}`
+    }
+    return null
+  },
+  // 普通视频
+  ({ id, url, query }) => url.replace(/\/[^\/]+$/, `/${id}`) + query,
+]
 export default Vue.extend({
   components: { VIcon },
   data() {
     return {
       aid: '',
-      aidCopyed: false,
+      aidCopied: false,
       bvid: '',
-      bvidCopyed: false,
+      bvidCopied: false,
     }
   },
   async mounted() {
@@ -43,16 +72,19 @@ export default Vue.extend({
     })
   },
   methods: {
-    async copyLink(data: 'aid' | 'bvid') {
-      if (this[`${data}Copyed`]) {
+    async copyLink(data: CopyIdType) {
+      if (this[`${data}Copied`]) {
         return
       }
-      const query = window.location.search
-      const url = document.URL.replace(query, '')
-      const link = url.replace(/\/[^\/]+$/, `/${this[data]}`) + query
+      const context = {
+        query: location.search,
+        url: location.origin + location.pathname,
+        id: this[data],
+      }
+      const link = linkProviders.map(p => p(context)).filter(it => it !== null)[0]
       await navigator.clipboard.writeText(link)
-      this[`${data}Copyed`] = true
-      setTimeout(() => (this[`${data}Copyed`] = false), 1000)
+      this[`${data}Copied`] = true
+      setTimeout(() => (this[`${data}Copied`] = false), 1000)
     },
   },
 })

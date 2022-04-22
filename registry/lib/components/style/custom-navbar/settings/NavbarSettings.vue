@@ -121,7 +121,6 @@ export default Vue.extend({
       open: false,
       padding: navbarOptions.padding,
       rendered,
-      // order: navbarOptions.order,
       hidden: navbarOptions.hidden,
       loaded: false,
     }

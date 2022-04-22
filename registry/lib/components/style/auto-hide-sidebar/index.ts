@@ -1,5 +1,6 @@
 import { ComponentMetadata } from '@/components/types'
 import { addComponentListener } from '@/core/settings'
+import { getNumberValidator } from '@/core/utils'
 
 const showSideBar = () => {
   const sidebar = dq('.be-settings .sidebar') as HTMLElement
@@ -48,7 +49,7 @@ export const component: ComponentMetadata = {
     triggerWidth: {
       defaultValue: 8,
       displayName: '触发区域宽度 (px)',
-      validator: (value: number) => lodash.clamp(value, 1, 1000),
+      validator: getNumberValidator(1, 1000),
     },
   },
   description: {

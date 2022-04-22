@@ -1,4 +1,4 @@
-import { VueConstructor } from 'vue'
+import { Component, VueConstructor } from 'vue'
 
 export type Executable<ReturnType = void> = () => ReturnType | Promise<ReturnType>
 export type ExecutableWithParameter<Parameters extends any[] = never[], ReturnType = void> = (
@@ -6,7 +6,12 @@ export type ExecutableWithParameter<Parameters extends any[] = never[], ReturnTy
 ) => ReturnType | Promise<ReturnType>
 
 export type TestPattern = (string | RegExp)[]
-export type VueModule = VueConstructor | { default: VueConstructor }
+export type ArrayContent<T> = T extends Array<infer R> ? R : T
+export type VueModule =
+  Component
+  | { default: Component }
+  | VueConstructor
+  | { default: VueConstructor }
 export type I18nDescription = string | { 'zh-CN': string; [key: string]: string }
 export type WithName = {
   name: string
